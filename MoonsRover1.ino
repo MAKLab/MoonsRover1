@@ -24,98 +24,102 @@ const int motorPwmPinB = 6;
 int pos = 0;    // variable to store the servo position
 
 void setup() {
-  Serial.begin(115200); //Best to use 115200, its the native baud for Pi Serial
-  Serial.println("Rover Activated");
-  
-  pan.attach(9);  // attaches the servo on pin 9 to the servo object
-  tilt.attach(10);
+	Serial.begin(115200); //Best to use 115200, its the native baud for Pi Serial
+	Serial.println("Rover Activated");
 
-  // Set PWM pins as outputs
-  pinMode (motorPwmPinA, OUTPUT);  
-  pinMode (motorPwmPinB, OUTPUT);
+	pan.attach(9);  // attaches the servo on pin 9 to the servo object
+	tilt.attach(10);
 
-  // Set Motor Direction Pins as outputs
-  pinMode(dir1PinA,OUTPUT);  // Motor A
-  pinMode(dir2PinA,OUTPUT);
+	// Set PWM pins as outputs
+	pinMode(motorPwmPinA, OUTPUT);
+	pinMode(motorPwmPinB, OUTPUT);
 
-  pinMode(dir1PinB,OUTPUT);  // Motor B
-  pinMode(dir2PinB,OUTPUT);
-  
+	// Set Motor Direction Pins as outputs
+	pinMode(dir1PinA, OUTPUT);  // Motor A
+	pinMode(dir2PinA, OUTPUT);
+
+	pinMode(dir1PinB, OUTPUT);  // Motor B
+	pinMode(dir2PinB, OUTPUT);
+
 }
 
 void loop() {
 
-  if (Serial.available()){
-    byte firstByte = Serial.read();
-    
-    // Check to see if it a motor
-    if (firstByte == 'M'){ 
+	if (Serial.available()>3){
+		byte firstByte = Serial.read();
+		byte motor = 0;
 
-      //  Its a motor, lets nab some movement data
-      byte motor = Serial.read();
-      bool direction = Serial.read();
-      int mSpeed = Serial.parseInt();
+		// Check to see if it a motor
+		if (firstByte == 'M'){
 
-      // Lets turn that into movement
+			//  Its a motor, lets nab some movement data
+			motor = Serial.read();
 
-      // Is it motor A?
-      if (motor == 'A'){
+			byte direction = Serial.read();
+			int mSpeed = Serial.parseInt();
+			//Serial.print("M");
 
-        Serial.print ("A");
+			// Lets turn that into movement
 
-        // Are we going forwards?
-        if (direction == 'F'){
-          digitalWrite(dir1PinA, LOW);
-          digitalWrite(dir2PinA, HIGH); 
-          Serial.print ("F");
-        } 
+			// Is it motor A?
+			if (motor == 'A'){
 
-        // perhaps reverse?
-        else if (direction == 'R'){
-          digitalWrite(dir1PinA, HIGH);
-          digitalWrite(dir2PinA, LOW);
-          Serial.print ("R");
-        }
-        analogWrite(motorPwmPinA, mSpeed);
-        Serial.println (mSpeed, DEC);
-      } 
+				Serial.print("A");
 
-      // Perhaps it's B then?
-      else if (motor == 'B'){
+				// Are we going forwards?
+				if (direction == 'F'){
+					digitalWrite(dir1PinA, HIGH);
+					digitalWrite(dir2PinA, LOW);
+					Serial.print("F");
+				}
 
-        // Are we going forwards
-        if (direction == 'F'){
-          digitalWrite(dir1PinA, LOW);
-          digitalWrite(dir2PinA, HIGH); 
-          Serial.print("F");
-        } 
-        
-        // perhaps reverse?
-        else if (direction == 'R')  {
-          digitalWrite(dir1PinB, HIGH);
-          digitalWrite(dir2PinB, LOW);
-          Serial.print("R");
-        }
-        analogWrite(motorPwmPinB, mSpeed);  
-        Serial.println(mSpeed, DEC);          
-      }
-    }
+				// perhaps reverse?
+				else if (direction == 'R'){
+					digitalWrite(dir1PinA, LOW);
+					digitalWrite(dir2PinA, HIGH);
+					Serial.print("R");
+				}
+				analogWrite(motorPwmPinA, mSpeed);
+				Serial.println(mSpeed, DEC);
+			}
 
-    // OK perhaps it is a servo instead
-    else if (firstByte == 'S'){
-      byte servo = Serial.read();
-      int degrees = Serial.parseInt();
-      Serial.print("S");
-      if (servo == 'P'){
-        pan.write(degrees);
-        Serial.print("P");
-        Serial.println(degrees, DEC);
-      } else if (servo == 'T'){
-        Serial.print("T");
-        tilt.write(degrees);     
-        Serial.println(degrees, DEC);
-      }
-    }
-  }
+			// Perhaps it's B then?
+			else if (motor == 'B'){
+
+				// Are we going forwards
+				if (direction == 'F'){
+					digitalWrite(dir1PinB, HIGH);
+					digitalWrite(dir2PinB, LOW);
+					Serial.print("F");
+				}
+
+				// perhaps reverse?
+				else if (direction == 'R')  {
+					digitalWrite(dir1PinB, LOW);
+					digitalWrite(dir2PinB, HIGH);
+					Serial.print("R");
+				}
+				analogWrite(motorPwmPinB, mSpeed);
+				Serial.println(mSpeed, DEC);
+			}
+		}
+
+		// OK perhaps it is a servo instead
+		else if (firstByte == 'S'){
+			byte servo = Serial.read();
+			int degrees = Serial.parseInt();
+			Serial.print("S");
+			if (servo == 'P'){
+				pan.write(degrees);
+				Serial.print("P");
+				Serial.println(degrees, DEC);
+			}
+			else if (servo == 'T'){
+				Serial.print("T");
+				tilt.write(degrees);
+				Serial.println(degrees, DEC);
+			}
+		}
+	}
 }
 

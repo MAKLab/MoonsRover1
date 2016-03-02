@@ -8,9 +8,11 @@
 Servo pan;  // create servo object to control a servo
 Servo tilt; // same again
 
-const bool debug = 1;
+unsigned long int timer; 
 
-// twelve servo objects can be created on most boards
+// const bool debug = 1;
+
+// Attach our motor pins to these pwm ports
 const int dir1PinA = 7;
 const int dir2PinA = 8;
 const int motorPwmPinA = 5;
@@ -19,16 +21,26 @@ const int dir1PinB = 11;
 const int dir2PinB = 12;
 const int motorPwmPinB = 6;
 
-// Attach our motor pins to these pwm ports
+// The rover needs to stop if the Pi has stopped sending instructions to it
+// timeOut decides how long we should wait
+const int timeOut = 500; 
 
-int pos = 0;    // variable to store the servo position
+// The camera mount does not sit pointing straight ahead, we can adjust it with this offet
+const int panOffset = -3;
+const int tiltOffset = 0;
+
 
 void setup() {
 	Serial.begin(115200); //Best to use 115200, its the native baud for Pi Serial
 	Serial.println("Rover Activated");
 
-	pan.attach(9);  // attaches the servo on pin 9 to the servo object
+  // Attach the pan Servo and set to straight ahead
+	pan.attach(9);              // attaches the servo on pin 9 to the servo object
+  pan.write(90 + panOffset);  // move servo to starting position
+
+  // Attach the tilt Servo and set to upright
 	tilt.attach(10);
+  tilt.write(90 + tiltOffset);
 
 	// Set PWM pins as outputs
 	pinMode(motorPwmPinA, OUTPUT);
@@ -41,10 +53,19 @@ void setup() {
 	pinMode(dir1PinB, OUTPUT);  // Motor B
 	pinMode(dir2PinB, OUTPUT);
 
+  timer = millis();  // We will use this timer to cut the motors if signal is lost to rPI
+
 }
 
 void loop() {
 
+  // Check to see if we have had no instruction for a while (bad)
+  if (timer + timeOut < millis()){
+    makeSafe();
+  }
+
+  //  Check to see if we have some instructions.  If there is enough serial data
+  //  for some reason I need more than one byte in the buffer?
 	if (Serial.available()>3){
 		byte firstByte = Serial.read();
 		byte motor = 0;
@@ -53,34 +74,32 @@ void loop() {
 		if (firstByte == 'M'){
 
 			//  Its a motor, lets nab some movement data
-			motor = Serial.read();
-
-			byte direction = Serial.read();
-			int mSpeed = Serial.parseInt();
-			//Serial.print("M");
-
+			motor = Serial.read();          // collects the motor name (A or B)
+			byte direction = Serial.read(); // collects the motor direction (F or R)
+			int mSpeed = Serial.parseInt(); // collects the motor speed (0 - 255)
+			
 			// Lets turn that into movement
 
 			// Is it motor A?
 			if (motor == 'A'){
 
-				Serial.print("A");
+				// Serial.print("A");  // uncomment to debug
 
 				// Are we going forwards?
 				if (direction == 'F'){
 					digitalWrite(dir1PinA, HIGH);
 					digitalWrite(dir2PinA, LOW);
-					Serial.print("F");
+					// Serial.print("F"); // uncomment to debug
 				}
 
 				// perhaps reverse?
 				else if (direction == 'R'){
 					digitalWrite(dir1PinA, LOW);
 					digitalWrite(dir2PinA, HIGH);
-					Serial.print("R");
+					// Serial.print("R"); // uncomment to debug
 				}
 				analogWrite(motorPwmPinA, mSpeed);
-				Serial.println(mSpeed, DEC);
+				// Serial.println(mSpeed, DEC); // uncomment to debug
 			}
 
 			// Perhaps it's B then?
@@ -90,17 +109,17 @@ void loop() {
 				if (direction == 'F'){
 					digitalWrite(dir1PinB, HIGH);
 					digitalWrite(dir2PinB, LOW);
-					Serial.print("F");
+					// Serial.print("F"); // uncomment to debug
 				}
 
 				// perhaps reverse?
 				else if (direction == 'R')  {
 					digitalWrite(dir1PinB, LOW);
 					digitalWrite(dir2PinB, HIGH);
-					Serial.print("R");
+					// Serial.print("R"); // uncomment to debug
 				}
 				analogWrite(motorPwmPinB, mSpeed);
-				Serial.println(mSpeed, DEC);
+				// Serial.println(mSpeed, DEC); // uncomment to debug
 			}
 		}
 
@@ -108,18 +127,45 @@ void loop() {
 		else if (firstByte == 'S'){
 			byte servo = Serial.read();
 			int degrees = Serial.parseInt();
-			Serial.print("S");
+			// Serial.print("S"); // uncomment to debug
 			if (servo == 'P'){
-				pan.write(degrees);
-				Serial.print("P");
-				Serial.println(degrees, DEC);
+				pan.write(degrees + panOffset);
+				// Serial.print("P"); // uncomment to debug
+				// Serial.println(degrees, DEC); // uncomment to debug
 			}
 			else if (servo == 'T'){
-				Serial.print("T");
-				tilt.write(degrees);
-				Serial.println(degrees, DEC);
+				tilt.write(degrees + tiltOffset);
+        // Serial.print("T");    // uncomment to debug     
+				// Serial.println(degrees, DEC); // uncomment to debug
 			}
 		}
+  // We have had a successful communication, keep the rover moving
+  // by reseting it's timer
+  timer = millis(); 
 	}
 }
+
+void makeSafe(){
+  // Apply the breaks
+  digitalWrite(dir1PinA, HIGH);
+  digitalWrite(dir2PinA, HIGH);
+
+  digitalWrite(dir1PinB, HIGH);
+  digitalWrite(dir2PinB, HIGH); 
+
+  // Set the camera mount to safe position
+  pan.write(90 + panOffset);
+  tilt.write(90 + tiltOffset);
+  
+  // tidy up by switching off the PWM signal
+  digitalWrite (motorPwmPinA, LOW);
+  digitalWrite (motorPwmPinB, LOW);
+}
+
+//  LM298 Enable Pins
+//  Enable Motor  HIGH–Enable   LOW – Disable Motor
+//  Direction 1   IN1 – HIGH    IN2 – LOW
+//  Direction 2   IN1 – LOW     IN2 – HIGH
+//  Coasting      IN1 – LOW     IN2 – LOW
+//  Break         IN1 – HIGH    IN2 – HIGH
 

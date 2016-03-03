@@ -62,6 +62,9 @@ void loop() {
   // Check to see if we have had no instruction for a while (bad)
   if (timer + timeOut < millis()){
     makeSafe();
+    timer = millis();  
+    // lets not waste too much time switching
+    // off motors that are already stopped
   }
 
   //  Check to see if we have some instructions.  If there is enough serial data

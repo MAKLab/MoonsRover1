@@ -1,0 +1,8 @@
+
+{
+	"sequence": [
+		{"move":"f5", "pan":"90", "tilt":"90"},
+		{"move":"l90", "pan":"180", "tilt"},
+		{"move":"b1"}
+	]
+}

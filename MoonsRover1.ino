@@ -79,26 +79,26 @@ void loop() {
 		// byte motor = 0;
 
 		// Check to see if its a motor
-		if (firstByte == 'M'||'m'){
+		if (firstByte == 'M' || firstByte == 'm'){
 
 			//  Its a motor, lets nab some movement data
 			byte motor = Serial.read();          // collects the motor name (L or R)
-			byte direction = Serial.read(); // collects the motor direction (F or B)
+			byte dir = Serial.read(); // collects the motor direction (F or B)
 			int mSpeed = Serial.parseInt(); // collects the motor speed (0 - 255)
 			
 			// Lets turn that into movement
 
 			// Is it motor L?
-			if (motor == 'L'||'l'){
+			if (motor == 'L' || motor == 'l'){
 
 				// Are we going forwards?
-				if (direction == 'F'||'f'){
+				if (dir == 'F' || dir == 'f'){
 					digitalWrite(dir1PinL, HIGH);
 					digitalWrite(dir2PinL, LOW);
 				}
 
 				// perhaps reverse?
-				else if (direction == 'B'||'b'){
+				else if (dir == 'B' || dir == 'b'){
 					digitalWrite(dir1PinL, LOW);
 					digitalWrite(dir2PinL, HIGH);
 				}
@@ -107,16 +107,16 @@ void loop() {
 			}
 
 			// Perhaps it's R then?
-			else if (motor == 'R'||'r'){
+			else if (motor == 'R' || motor == 'r'){
 
 				// Are we going forwards
-				if (direction == 'F'||'f'){
+				if (dir == 'F' || dir == 'f'){
 					digitalWrite(dir1PinR, HIGH);
 					digitalWrite(dir2PinR, LOW);
 				}
 
 				// perhaps reverse?
-				else if (direction == 'R'||'r')  {
+				else if (dir == 'R' || dir == 'r')  {
 					digitalWrite(dir1PinR, LOW);
 					digitalWrite(dir2PinR, HIGH);
 				}
@@ -126,22 +126,22 @@ void loop() {
 		}
 
 		// OK perhaps it is a servo instead
-		else if (firstByte == 'S'||'s'){
+		else if (firstByte == 'S' || firstByte == 's'){
       
 			byte servo = Serial.read();
 			int degrees = Serial.parseInt();
 
-			if (servo == 'P'||'p'){
+			if (servo == 'P' || servo == 'p'){
 				pan.write(degrees + panOffset);
 			}
-			else if (servo == 'T'||'t'){
+			else if (servo == 'T' || servo == 't'){
 				tilt.write(degrees + tiltOffset);
 			}
 		}
    
-  // We have had a successful communication, keep the rover moving
-  // by reseting it's safety timeout
-  timer = millis(); 
+	// We have had a successful communication, keep the rover moving
+  	// by reseting it's safety timeout
+  	timer = millis(); 
 	}
 }
 
@@ -168,4 +168,3 @@ void makeSafe(){
 //  Direction 2   IN1 – LOW     IN2 – HIGH
 //  Coasting      IN1 – LOW     IN2 – LOW
 //  Break         IN1 – HIGH    IN2 – HIGH
-

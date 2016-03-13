@@ -1,8 +1,16 @@
 #!/usr/bin/env python
 from flask import Flask, render_template, Response
 
+try:
+    from camera_pi import Camera
+except ImportError:
+    print("camera_pi module not found, falling back to camera_dev")
+    from camera_dev import Camera
+
+
+
 # emulated camera
-from camera import Camera
+#from camera import Camera
 
 # Raspberry Pi camera module (requires picamera package)
 # from camera_pi import Camera

@@ -116,7 +116,7 @@ void loop() {
 				}
 
 				// perhaps reverse?
-				else if (dir == 'R' || dir == 'r')  {
+				else if (dir == 'B' || dir == 'b')  {
 					digitalWrite(dir1PinR, LOW);
 					digitalWrite(dir2PinR, HIGH);
 				}

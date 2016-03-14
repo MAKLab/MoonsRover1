@@ -1,0 +1,10 @@
+{"ins": [
+{ "command": "forward", "distance" : 200 }
+, { "command": "pan", "distance": 10 }
+, { "command": "tilt", "distance": 90 }
+, { "command": "left", "distance": 90 }
+, { "command": "pan", "distance": 180 }
+, { "command": "tilt", "distance": 10 }
+, { "command": "back", "distance": 200 }
+]
+}

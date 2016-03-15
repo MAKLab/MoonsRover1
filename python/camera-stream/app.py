@@ -8,16 +8,13 @@ except ImportError:
     print("camera_pi module not found, falling back to camera_dev")
     from camera_dev import Camera
 
+from rover_interface import RoverInterface
 
-
-# emulated camera
-#from camera import Camera
-
-# Raspberry Pi camera module (requires picamera package)
-# from camera_pi import Camera
-
+# Create our Flask app
 app = Flask(__name__)
 
+# Create the rover interface
+rover = RoverInterface()
 
 @app.route('/')
 def index():
@@ -43,10 +40,17 @@ def video_feed():
 @app.route('/rover/api/v1.0/instructions', methods=['PUT'])
 def postInstructions():
     """Instruction posting route."""
+    # Check we got some kind of JSON
     if not request.json:
-        abort(400)
+        return json.dumps({'success': False, 'error':'No instructions received'}), 400
 
-    print(request.json)
+    # Check the instructions
+    if not rover.validateInstructions(request.json):
+        return json.dumps({'success': False, 'error':'Invalid instructions'}), 400
+
+    # Give the rover the instructions
+    rover.addValidInstructions(request.json)
+    
     return json.dumps({'success': True}), 200
 
 

@@ -1,6 +1,7 @@
 import json
 import serial
 import threading
+import time
 
 from collections import deque
 
@@ -59,6 +60,7 @@ class RoverInterface:
         while len(cls.instructionDeque) > 0:
             instruction = cls.instructionDeque.popleft()
             print(instruction['command'])
+            time.sleep(1)
 
         # TODO: This is only reassigning the reference, not deleting the thread
         cls.thread = None

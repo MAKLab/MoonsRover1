@@ -1,5 +1,7 @@
 import json
+import serial
 import threading
+
 from collections import deque
 
 class RoverInterface:
@@ -10,6 +12,8 @@ class RoverInterface:
     # The thread that passes the instructions to the Arduino.
     thread = None
 
+    # The serial port - currently does not exist/work
+    #ser = serial.Serial('/dev/ttyAMA0', 115200)
 
     @classmethod
     def validCommands(self):

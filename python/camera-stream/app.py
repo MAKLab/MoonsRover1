@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from flask import Flask, render_template, Response
+import json
+from flask import Flask, render_template, Response, request
 
 try:
     from camera_pi import Camera
@@ -37,6 +38,16 @@ def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(gen(Camera()),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/rover/api/v1.0/instructions', methods=['PUT'])
+def postInstructions():
+    """Instruction posting route."""
+    if not request.json:
+        abort(400)
+
+    print(request.json)
+    return json.dumps({'success': True}), 200
 
 
 if __name__ == '__main__':

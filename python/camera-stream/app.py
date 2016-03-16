@@ -15,6 +15,7 @@ app = Flask(__name__)
 
 # Create the rover interface
 rover = RoverInterface()
+rover.initialize()
 
 @app.route('/')
 def index():

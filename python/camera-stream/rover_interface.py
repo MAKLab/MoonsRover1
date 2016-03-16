@@ -14,7 +14,17 @@ class RoverInterface:
     thread = None
 
     # The serial port - currently does not exist/work
-    #ser = serial.Serial('/dev/ttyAMA0', 115200)
+    ser = None
+
+    
+    def initialize(self):
+        try:
+	    RoverInterface.serialPort = serial.Serial('/dev/ttyAMA0', 115200)
+        
+	except(OSError, serial.SerialException):
+	    print("Caught SerialException")
+	    RoverInterface.serialPort = None
+
 
     @classmethod
     def validCommands(self):
@@ -59,8 +69,17 @@ class RoverInterface:
         """This method is run by the thread. It runs the instructions on the Arduino."""
         while len(cls.instructionDeque) > 0:
             instruction = cls.instructionDeque.popleft()
-            print(instruction['command'])
+            cls.transmit(instruction['command'])
             time.sleep(1)
 
         # TODO: This is only reassigning the reference, not deleting the thread
         cls.thread = None
+
+
+    @classmethod
+    def transmit(self, command):
+        if RoverInterface.serialPort is None:
+	    print(command)
+	    return
+	
+	RoverInterface.serialPort.write(command)

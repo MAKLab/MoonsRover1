@@ -11,12 +11,12 @@ while True:
 	try:
 		for x in instructions["ins"]:
 			if x['command'] == 'forward':
-				ser.write('MAF' + str(x['distance']) + ',')
-				ser.write('MBF' + str(x['distance']) + ',')
+				ser.write('MLF' + str(x['distance']) + ',')
+				ser.write('MRF' + str(x['distance']) + ',')
 				time.sleep(.5)
 			elif x['command'] == 'back':
-				ser.write('MAR' + str(x['distance']) + ',')
-				ser.write('MBR' + str(x['distance']) + ',')
+				ser.write('MLB' + str(x['distance']) + ',')
+				ser.write('MRB' + str(x['distance']) + ',')
 				time.sleep(.5)
 			elif x['command'] == 'pan':
 				ser.write('SP' + str(x['distance']) + ',')

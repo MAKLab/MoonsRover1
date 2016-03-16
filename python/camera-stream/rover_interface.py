@@ -69,9 +69,18 @@ class RoverInterface:
         """This method is run by the thread. It runs the instructions on the Arduino."""
         while len(cls.instructionDeque) > 0:
             instruction = cls.instructionDeque.popleft()
-            cls.transmit(instruction['command'])
-            time.sleep(1)
-
+	    command = instruction['command']
+	    if command == "forward":
+	        cls.transmit("MAF200,")
+	        cls.transmit("MBF200,")
+	        time.sleep(0.5)
+	    elif command == "back":
+	        cls.transmit("MAF200,")
+	        cls.transmit("MBF200,")
+	        time.sleep(0.5)
+            else:
+                print("Command not handled: {}".format(command))
+        
         # TODO: This is only reassigning the reference, not deleting the thread
         cls.thread = None
 

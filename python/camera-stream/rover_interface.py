@@ -71,13 +71,24 @@ class RoverInterface:
             instruction = cls.instructionDeque.popleft()
 	    command = instruction['command']
 	    if command == "forward":
-	        cls.transmit("MAF200,")
-	        cls.transmit("MBF200,")
-	        time.sleep(0.5)
+	        cls.transmit("MAF255,")
+	        cls.transmit("MBF255,")
+	        time.sleep(1)
 	    elif command == "back":
-	        cls.transmit("MAF200,")
-	        cls.transmit("MBF200,")
-	        time.sleep(0.5)
+	        cls.transmit("MAR255,")
+	        cls.transmit("MBR255,")
+	        time.sleep(1)
+            elif command == "right":
+                cls.transmit("MAR255,")
+		cls.transmit("MBF255,")
+		time.sleep(1)
+            elif command == "left":
+                cls.transmit("MBR255,")
+		cls.transmit("MAF255,")
+		time.sleep(1)
+	    elif command == "pan":
+	        cls.transmit("SP0,")
+		time.sleep(1)
             else:
                 print("Command not handled: {}".format(command))
         

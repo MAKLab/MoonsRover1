@@ -82,4 +82,4 @@ class RoverInterface:
 	    print(command)
 	    return
 	
-	RoverInterface.serialPort.write(command)
+	RoverInterface.serialPort.write(command.encode('utf-8'))

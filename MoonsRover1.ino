@@ -89,6 +89,8 @@ uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
 uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 
+float targetYaw;
+
 
 volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 
@@ -232,8 +234,6 @@ void loop() {
 	if (timer + timeOut < millis()) {
 		makeSafe();
 		timer = millis();
-		// lets not waste too much time switching
-		// off motors that are already stopped
 	}  // end if safety
 
 	//  Check to see if we have some instructions.  If there is enough serial data
@@ -254,48 +254,96 @@ void loop() {
 
 			if (motor == 'a' || motor == 'A') {
 				// code for all motors goes here!
-				if (dir == 'F' || dir == 'f') {
+			 	if (dir == 'F' || dir == 'f') {  // All Motors forward!
 					digitalWrite(dir1PinL, HIGH);
 					digitalWrite(dir2PinL, LOW);
-				}
+          digitalWrite(dir1PinR, HIGH);
+          digitalWrite(dir2PinR, LOW);
+          analogWrite (motorPwmPinL, mSpeed);
+          analogWrite (motorPwmPinR, mSpeed);
+				}  // end if dir = F
 
-				// perhaps reverse?
-				else if (dir == 'B' || dir == 'b') {
+				else 
+        // perhaps reverse?			
+				if (dir == 'B' || dir == 'b') {
 					digitalWrite(dir1PinL, LOW);
 					digitalWrite(dir2PinL, HIGH);
+          digitalWrite(dir1PinL, LOW);
+          digitalWrite(dir2PinL, HIGH);
+          analogWrite (motorPwmPinL, mSpeed);
+          analogWrite (motorPwmPinR, mSpeed);
+				} // end IF dir = B
+				else 
+				// a turn?
+				if (dir == 'L' || dir == 'l' || dir == 'R' || dir == 'r' ){
+          float targetYaw = getYaw();  // Find out what way we are facing
+          Serial.println(targetYaw, 1);  // for debug
 				}
 
+        // Now lets set our target 
+        if (dir == 'L' || dir == 'l') {
+          targetYaw -= mSpeed;
+          digitalWrite(dir1PinL, HIGH);  // Left Forward
+          digitalWrite(dir2PinL, LOW);   // Left Forward
 
+          digitalWrite(dir1PinR, LOW);   // Right Back
+          digitalWrite(dir2PinR, HIGH);  // Right Back
 
-			}
+          analogWrite (motorPwmPinL, 255);
+          analogWrite (motorPwmPinR, 255);  
 
-			// Is it motor L?
-			if (motor == 'L' || motor == 'l') {
+          while (targetYaw < getYaw()){
+            // do nothing 
+          }
+          makeSafe();
+        } 
+        else 
+        
+        if (dir == 'R' || dir == 'r') {
+          targetYaw += mSpeed;
 
-				// Are we going forwards?
-				if (dir == 'F' || dir == 'f') {
-					digitalWrite(dir1PinL, HIGH);
-					digitalWrite(dir2PinL, LOW);
-				}
+          digitalWrite(dir1PinR, HIGH);   // Right forward
+          digitalWrite(dir2PinR, LOW);    // Right forward
 
-				// perhaps reverse?
-				else if (dir == 'B' || dir == 'b') {
-					digitalWrite(dir1PinL, LOW);
-					digitalWrite(dir2PinL, HIGH);
-				}
+          digitalWrite(dir1PinL, LOW);    // Left Back
+          digitalWrite(dir2PinL, HIGH);   // Left Back
 
-				analogWrite(motorPwmPinL, mSpeed);
-			}
+          analogWrite (motorPwmPinL, 255);
+          analogWrite (motorPwmPinR, 255);  
 
+          while (targetYaw > getYaw()){
+            // do nothing 
+          }
+          makeSafe();
+          
+        }  // End IF dir = R
+			}  // end IF Motor = A
+
+			else 
+     
+				// Is it motor L?
+			  if (motor == 'L' || motor == 'l') {
+				  // Are we going forwards?
+				  if (dir == 'F' || dir == 'f') {
+				  	digitalWrite(dir1PinL, HIGH);  // Forward
+					  digitalWrite(dir2PinL, LOW);   // Forward
+				  }  // end if dir = f
+				  // perhaps reverse?
+				  else if (dir == 'B' || dir == 'b') {
+					  digitalWrite(dir1PinL, LOW);
+					  digitalWrite(dir2PinL, HIGH);
+				  } // end if dir = r
+          analogWrite(motorPwmPinL, mSpeed);
+			}  // End IF Motor = L
+      else
+      
 			// Perhaps it's R then?
-			else if (motor == 'R' || motor == 'r') {
-
+        if (motor == 'R' || motor == 'r') {
 				// Are we going forwards
 				if (dir == 'F' || dir == 'f') {
-					digitalWrite(dir1PinR, HIGH);
-					digitalWrite(dir2PinR, LOW);
+					digitalWrite(dir1PinR, HIGH);   //forward
+					digitalWrite(dir2PinR, LOW);    //forward
 				}
-
 				// perhaps reverse?
 				else if (dir == 'B' || dir == 'b') {
 					digitalWrite(dir1PinR, LOW);
@@ -303,24 +351,10 @@ void loop() {
 				}
 
 				analogWrite(motorPwmPinR, mSpeed);
-			}
+			}  // End IF Motor = R
 
-			// perhaps it is a turn
-			else if (dir == 'T' || 't') {
-
-				// turn here 
-				if (dir == 'L' || dir == 'l') {
-					digitalWrite(dir1PinL, LOW);
-					digitalWrite(dir2PinL, HIGH);
-					digitalWrite(dir1PinR, HIGH);
-					digitalWrite(dir2PinR, LOW);
-				} 
-				else if (dir == 'R' || dir == 'r') {
-					digitalWrite(dir1PinR, HIGH);
-					digitalWrite(dir2PinR, LOW);
-				}
-			}
-		}
+     
+		}  // end firstbyte = m
 
 		// OK perhaps it is a servo instead
 		else if (firstByte == 'S' || firstByte == 's') {
@@ -341,8 +375,7 @@ void loop() {
 		timer = millis();
 	}// end serial instruction recivied
 
-	float oldYaw = getYaw();
-	Serial.println(oldYaw, 1);
+
 
 } // End loop
 
@@ -418,6 +451,8 @@ float getYaw() {  // True for right
 	// Do turning stuff here 
 
 }
+
+void setLeftMotor(int){}
 
 //  LM298 Enable Pins
 //  Enable Motor  HIGH–Enable   LOW – Disable Motor

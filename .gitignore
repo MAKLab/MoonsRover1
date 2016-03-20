@@ -13,6 +13,7 @@ __pycache__/
 *.xml
 *.vsarduino.h
 *.vmps.xml
+*.opensdf
 
 
 

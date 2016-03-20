@@ -36,24 +36,24 @@ MPU6050 mpu;
    depends on the MPU-6050's INT pin being connected to the Arduino's
    external interrupt #0 pin. On the Arduino Uno and Mega 2560, this is
    digital I/O pin 2.
- * ========================================================================= */
+   * ========================================================================= */
 
- // uncomment "OUTPUT_READABLE_QUATERNION" if you want to see the actual
- // quaternion components in a [w, x, y, z] format (not best for parsing
- // on a remote host such as Processing or something though)
- //#define OUTPUT_READABLE_QUATERNION
+// uncomment "OUTPUT_READABLE_QUATERNION" if you want to see the actual
+// quaternion components in a [w, x, y, z] format (not best for parsing
+// on a remote host such as Processing or something though)
+//#define OUTPUT_READABLE_QUATERNION
 
- // uncomment "OUTPUT_READABLE_EULER" if you want to see Euler angles
- // (in degrees) calculated from the quaternions coming from the FIFO.
- // Note that Euler angles suffer from gimbal lock (for more info, see
- // http://en.wikipedia.org/wiki/Gimbal_lock)
- //#define OUTPUT_READABLE_EULER
+// uncomment "OUTPUT_READABLE_EULER" if you want to see Euler angles
+// (in degrees) calculated from the quaternions coming from the FIFO.
+// Note that Euler angles suffer from gimbal lock (for more info, see
+// http://en.wikipedia.org/wiki/Gimbal_lock)
+//#define OUTPUT_READABLE_EULER
 
- // uncomment "OUTPUT_READABLE_YAWPITCHROLL" if you want to see the yaw/
- // pitch/roll angles (in degrees) calculated from the quaternions coming
- // from the FIFO. Note this also requires gravity vector calculations.
- // Also note that yaw/pitch/roll angles suffer from gimbal lock (for
- // more info, see: http://en.wikipedia.org/wiki/Gimbal_lock)
+// uncomment "OUTPUT_READABLE_YAWPITCHROLL" if you want to see the yaw/
+// pitch/roll angles (in degrees) calculated from the quaternions coming
+// from the FIFO. Note this also requires gravity vector calculations.
+// Also note that yaw/pitch/roll angles suffer from gimbal lock (for
+// more info, see: http://en.wikipedia.org/wiki/Gimbal_lock)
 #define OUTPUT_READABLE_YAWPITCHROLL
 
 // uncomment "OUTPUT_READABLE_REALACCEL" if you want to see acceleration
@@ -178,7 +178,7 @@ void setup() {
 		mpu.setDMPEnabled(true);
 
 		// enable Arduino interrupt detection
-	   // Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
+		// Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
 		attachInterrupt(0, dmpDataReady, RISING);
 		mpuIntStatus = mpu.getIntStatus();
 
@@ -228,8 +228,8 @@ void setup() {
 }
 
 void loop() {
-	if (!dmpReady) return;
-
+	 if (!dmpReady) return;
+	//Serial.print(".");
 	// Check to see if we have had no instruction for a while (bad)
 	if (timer + timeOut < millis()) {
 		makeSafe();
@@ -238,12 +238,13 @@ void loop() {
 
 	//  Check to see if we have some instructions.  If there is enough serial data
 	//  for some reason I need more than one byte in the buffer?
-	if (Serial.available()>3) {
+	if (Serial.available() > 3) {
 		byte firstByte = Serial.read();
 		// byte motor = 0;
 
 		// Check to see if its a motor
 		if (firstByte == 'M' || firstByte == 'm') {
+			Serial.println(F("Motor"));
 
 			//  Its a motor, lets nab some movement data
 			byte motor = Serial.read();          // collects the motor name (L or R)
@@ -254,91 +255,93 @@ void loop() {
 
 			if (motor == 'a' || motor == 'A') {
 				// code for all motors goes here!
-			 	if (dir == 'F' || dir == 'f') {  // All Motors forward!
+				if (dir == 'F' || dir == 'f') {  // All Motors forward!
 					digitalWrite(dir1PinL, HIGH);
 					digitalWrite(dir2PinL, LOW);
-          digitalWrite(dir1PinR, HIGH);
-          digitalWrite(dir2PinR, LOW);
-          analogWrite (motorPwmPinL, mSpeed);
-          analogWrite (motorPwmPinR, mSpeed);
-				}  // end if dir = F
+					digitalWrite(dir1PinR, HIGH);
+					digitalWrite(dir2PinR, LOW);
+					analogWrite(motorPwmPinL, mSpeed);
+					analogWrite(motorPwmPinR, mSpeed);
+				}
+				else if (dir == 'B' || dir == 'b') {
+					// perhaps reverse?			
 
-				else 
-        // perhaps reverse?			
-				if (dir == 'B' || dir == 'b') {
 					digitalWrite(dir1PinL, LOW);
 					digitalWrite(dir2PinL, HIGH);
-          digitalWrite(dir1PinL, LOW);
-          digitalWrite(dir2PinL, HIGH);
-          analogWrite (motorPwmPinL, mSpeed);
-          analogWrite (motorPwmPinR, mSpeed);
+					digitalWrite(dir1PinL, LOW);
+					digitalWrite(dir2PinL, HIGH);
+					analogWrite(motorPwmPinL, mSpeed);
+					analogWrite(motorPwmPinR, mSpeed);
 				} // end IF dir = B
-				else 
-				// a turn?
-				if (dir == 'L' || dir == 'l' || dir == 'R' || dir == 'r' ){
-          float targetYaw = getYaw();  // Find out what way we are facing
-          Serial.println(targetYaw, 1);  // for debug
+				else if (dir == 'L' || dir == 'l' || dir == 'R' || dir == 'r'){
+					// a turn?
+
+					float targetYaw = getYaw();  // Find out what way we are facing
+					Serial.println(targetYaw, 1);  // for debug
 				}
 
-        // Now lets set our target 
-        if (dir == 'L' || dir == 'l') {
-          targetYaw -= mSpeed;
-          digitalWrite(dir1PinL, HIGH);  // Left Forward
-          digitalWrite(dir2PinL, LOW);   // Left Forward
+				// Now lets set our target 
+				if (dir == 'L' || dir == 'l') {
 
-          digitalWrite(dir1PinR, LOW);   // Right Back
-          digitalWrite(dir2PinR, HIGH);  // Right Back
+					if (targetYaw - mSpeed < -180){
+						targetYaw = 180 + targetYaw + mSpeed;
+					} else { 
+						targetYaw -= mSpeed; 
+					}
 
-          analogWrite (motorPwmPinL, 255);
-          analogWrite (motorPwmPinR, 255);  
+					digitalWrite(dir1PinL, HIGH);  // Left Forward
+					digitalWrite(dir2PinL, LOW);   // Left Forward
 
-          while (targetYaw < getYaw()){
-            // do nothing 
-          }
-          makeSafe();
-        } 
-        else 
-        
-        if (dir == 'R' || dir == 'r') {
-          targetYaw += mSpeed;
+					digitalWrite(dir1PinR, LOW);   // Right Back
+					digitalWrite(dir2PinR, HIGH);  // Right Back
 
-          digitalWrite(dir1PinR, HIGH);   // Right forward
-          digitalWrite(dir2PinR, LOW);    // Right forward
+					analogWrite(motorPwmPinL, 255);
+					analogWrite(motorPwmPinR, 255);
 
-          digitalWrite(dir1PinL, LOW);    // Left Back
-          digitalWrite(dir2PinL, HIGH);   // Left Back
+					while (targetYaw < getYaw()){
 
-          analogWrite (motorPwmPinL, 255);
-          analogWrite (motorPwmPinR, 255);  
+						// do nothing 
+					}
+					makeSafe();
+				}
+				else if (dir == 'R' || dir == 'r') {
+					if (targetYaw + mSpeed > 180){
+						targetYaw = -180 + targetYaw - mSpeed;
+					}
+					else {
+						targetYaw += mSpeed;
+					}
 
-          while (targetYaw > getYaw()){
-            // do nothing 
-          }
-          makeSafe();
-          
-        }  // End IF dir = R
+					digitalWrite(dir1PinR, HIGH);   // Right forward
+					digitalWrite(dir2PinR, LOW);    // Right forward
+
+					digitalWrite(dir1PinL, LOW);    // Left Back
+					digitalWrite(dir2PinL, HIGH);   // Left Back
+
+					analogWrite(motorPwmPinL, 255);
+					analogWrite(motorPwmPinR, 255);
+
+					while (targetYaw > getYaw()){
+						// do nothing 
+					}
+					makeSafe();
+
+				}  // End IF dir = R
 			}  // end IF Motor = A
-
-			else 
-     
-				// Is it motor L?
-			  if (motor == 'L' || motor == 'l') {
-				  // Are we going forwards?
-				  if (dir == 'F' || dir == 'f') {
-				  	digitalWrite(dir1PinL, HIGH);  // Forward
-					  digitalWrite(dir2PinL, LOW);   // Forward
-				  }  // end if dir = f
-				  // perhaps reverse?
-				  else if (dir == 'B' || dir == 'b') {
-					  digitalWrite(dir1PinL, LOW);
-					  digitalWrite(dir2PinL, HIGH);
-				  } // end if dir = r
-          analogWrite(motorPwmPinL, mSpeed);
+			else if (motor == 'L' || motor == 'l') {
+				// Are we going forwards?
+				if (dir == 'F' || dir == 'f') {
+					digitalWrite(dir1PinL, HIGH);  // Forward
+					digitalWrite(dir2PinL, LOW);   // Forward
+				}  // end if dir = f
+				// perhaps reverse?
+				else if (dir == 'B' || dir == 'b') {
+					digitalWrite(dir1PinL, LOW);
+					digitalWrite(dir2PinL, HIGH);
+				} // end if dir = r
+				analogWrite(motorPwmPinL, mSpeed);
 			}  // End IF Motor = L
-      else
-      
-			// Perhaps it's R then?
-        if (motor == 'R' || motor == 'r') {
+			else if (motor == 'R' || motor == 'r') {
 				// Are we going forwards
 				if (dir == 'F' || dir == 'f') {
 					digitalWrite(dir1PinR, HIGH);   //forward
@@ -353,9 +356,9 @@ void loop() {
 				analogWrite(motorPwmPinR, mSpeed);
 			}  // End IF Motor = R
 
-     
-		}  // end firstbyte = m
 
+		}  // end firstbyte = m
+		  
 		// OK perhaps it is a servo instead
 		else if (firstByte == 'S' || firstByte == 's') {
 
@@ -443,7 +446,7 @@ float getYaw() {  // True for right
 		//Serial.print("ypr\t");
 
 		float Yaw = ypr[0] * 180 / M_PI;  // pick up last one
-		//Serial.println(ypr[0] * 180 / M_PI);
+		Serial.println(Yaw);
 
 		return Yaw;
 	}

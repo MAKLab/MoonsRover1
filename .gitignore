@@ -3,6 +3,20 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Visual Studio files
+*.suo
+*.sln
+*.sdf
+*.suo
+*.vcxproj
+*.vcxproj.filters
+*.xml
+*.vsarduino.h
+*.vmps.xml
+
+
+
+
 # C extensions
 *.so
 

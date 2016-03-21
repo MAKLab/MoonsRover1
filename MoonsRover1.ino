@@ -228,7 +228,7 @@ void setup() {
 }
 
 void loop() {
-	 if (!dmpReady) return;
+	if (!dmpReady) return;
 	//Serial.print(".");
 	// Check to see if we have had no instruction for a while (bad)
 	if (timer + timeOut < millis()) {
@@ -282,49 +282,69 @@ void loop() {
 
 				// Now lets set our target 
 				if (dir == 'L' || dir == 'l') {
-
-					if (targetYaw - mSpeed < -180){
-						targetYaw = 180 + targetYaw + mSpeed;
-					} else { 
-						targetYaw -= mSpeed; 
-					}
-
 					digitalWrite(dir1PinL, HIGH);  // Left Forward
 					digitalWrite(dir2PinL, LOW);   // Left Forward
 
 					digitalWrite(dir1PinR, LOW);   // Right Back
 					digitalWrite(dir2PinR, HIGH);  // Right Back
 
-					analogWrite(motorPwmPinL, 255);
-					analogWrite(motorPwmPinR, 255);
+					if ((targetYaw - mSpeed) < -180){
+						targetYaw = 180 + targetYaw + mSpeed;
 
-					while (targetYaw < getYaw()){
+						analogWrite(motorPwmPinL, 200);
+						analogWrite(motorPwmPinR, 200);
 
-						// do nothing 
-					}
-					makeSafe();
-				}
-				else if (dir == 'R' || dir == 'r') {
-					if (targetYaw + mSpeed > 180){
-						targetYaw = -180 + targetYaw - mSpeed;
+						float Yaw = getYaw();
+						while ((targetYaw > Yaw && Yaw < 0) || (targetYaw < Yaw && Yaw > 0)){
+							Yaw = getYaw();
+							// do nothing 
+						}
+						makeSafe();
+
 					}
 					else {
-						targetYaw += mSpeed;
+						targetYaw -= mSpeed;
+						analogWrite(motorPwmPinL, 200);
+						analogWrite(motorPwmPinR, 200);
+
+						while (targetYaw < getYaw()){
+
+							// do nothing 
+						}
+						makeSafe();
 					}
 
+
+
+				}
+				else if (dir == 'R' || dir == 'r') {
 					digitalWrite(dir1PinR, HIGH);   // Right forward
 					digitalWrite(dir2PinR, LOW);    // Right forward
 
 					digitalWrite(dir1PinL, LOW);    // Left Back
-					digitalWrite(dir2PinL, HIGH);   // Left Back
+					digitalWrite(dir2PinL, HIGH);   // Left Back	
 
-					analogWrite(motorPwmPinL, 255);
-					analogWrite(motorPwmPinR, 255);
+					if (targetYaw + mSpeed > 180){
+						targetYaw = -180 + targetYaw - mSpeed;
 
-					while (targetYaw > getYaw()){
-						// do nothing 
+						analogWrite(motorPwmPinL, 200);
+						analogWrite(motorPwmPinR, 200);
+						bool Yaw = getYaw();
+						while ((targetYaw < Yaw && Yaw > 0) || (targetYaw > Yaw && Yaw < 0)){
+							Yaw = getYaw();
+						}
+						makeSafe();
 					}
-					makeSafe();
+					else {
+						targetYaw += mSpeed;
+						analogWrite(motorPwmPinL, 200);
+						analogWrite(motorPwmPinR, 200);
+
+						while (targetYaw > getYaw()){
+
+						}
+						makeSafe();
+					}
 
 				}  // End IF dir = R
 			}  // end IF Motor = A
@@ -358,7 +378,7 @@ void loop() {
 
 
 		}  // end firstbyte = m
-		  
+
 		// OK perhaps it is a servo instead
 		else if (firstByte == 'S' || firstByte == 's') {
 
@@ -446,8 +466,10 @@ float getYaw() {  // True for right
 		//Serial.print("ypr\t");
 
 		float Yaw = ypr[0] * 180 / M_PI;  // pick up last one
-		Serial.println(Yaw);
 
+		if (int(Yaw) % 10 == 0){  // display major angles
+			Serial.println(Yaw);
+		}
 		return Yaw;
 	}
 

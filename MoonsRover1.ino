@@ -38,22 +38,22 @@ MPU6050 mpu;
    digital I/O pin 2.
    * ========================================================================= */
 
-// uncomment "OUTPUT_READABLE_QUATERNION" if you want to see the actual
-// quaternion components in a [w, x, y, z] format (not best for parsing
-// on a remote host such as Processing or something though)
-//#define OUTPUT_READABLE_QUATERNION
+   // uncomment "OUTPUT_READABLE_QUATERNION" if you want to see the actual
+   // quaternion components in a [w, x, y, z] format (not best for parsing
+   // on a remote host such as Processing or something though)
+   //#define OUTPUT_READABLE_QUATERNION
 
-// uncomment "OUTPUT_READABLE_EULER" if you want to see Euler angles
-// (in degrees) calculated from the quaternions coming from the FIFO.
-// Note that Euler angles suffer from gimbal lock (for more info, see
-// http://en.wikipedia.org/wiki/Gimbal_lock)
-//#define OUTPUT_READABLE_EULER
+   // uncomment "OUTPUT_READABLE_EULER" if you want to see Euler angles
+   // (in degrees) calculated from the quaternions coming from the FIFO.
+   // Note that Euler angles suffer from gimbal lock (for more info, see
+   // http://en.wikipedia.org/wiki/Gimbal_lock)
+   //#define OUTPUT_READABLE_EULER
 
-// uncomment "OUTPUT_READABLE_YAWPITCHROLL" if you want to see the yaw/
-// pitch/roll angles (in degrees) calculated from the quaternions coming
-// from the FIFO. Note this also requires gravity vector calculations.
-// Also note that yaw/pitch/roll angles suffer from gimbal lock (for
-// more info, see: http://en.wikipedia.org/wiki/Gimbal_lock)
+   // uncomment "OUTPUT_READABLE_YAWPITCHROLL" if you want to see the yaw/
+   // pitch/roll angles (in degrees) calculated from the quaternions coming
+   // from the FIFO. Note this also requires gravity vector calculations.
+   // Also note that yaw/pitch/roll angles suffer from gimbal lock (for
+   // more info, see: http://en.wikipedia.org/wiki/Gimbal_lock)
 #define OUTPUT_READABLE_YAWPITCHROLL
 
 // uncomment "OUTPUT_READABLE_REALACCEL" if you want to see acceleration
@@ -274,10 +274,11 @@ void loop() {
 					analogWrite(motorPwmPinL, mSpeed);
 					analogWrite(motorPwmPinR, mSpeed);
 				} // end IF dir = B
-				else if (dir == 'L' || dir == 'l' || dir == 'R' || dir == 'r'){
+				else if (dir == 'L' || dir == 'l' || dir == 'R' || dir == 'r') {
 					// a turn?
 
 					targetYaw = getYaw();  // Find out what way we are facing
+					Serial.print(F("Start Yaw: "));
 					Serial.println(targetYaw, 1);  // for debug
 				}
 
@@ -289,16 +290,16 @@ void loop() {
 					digitalWrite(dir1PinR, LOW);   // Right Back
 					digitalWrite(dir2PinR, HIGH);  // Right Back
 
-					if ((targetYaw - mSpeed) < -180){
+					if ((targetYaw - mSpeed) < -180) {
 						targetYaw = 180 + targetYaw + mSpeed;
 						Serial.print(F("Target: "));
 						Serial.println(targetYaw);
 
-						analogWrite(motorPwmPinL, 200);
-						analogWrite(motorPwmPinR, 200);
+						analogWrite(motorPwmPinL, 255);
+						analogWrite(motorPwmPinR, 255);
 
 						float Yaw = getYaw();
-						while ((targetYaw > Yaw && Yaw < 0) || (targetYaw < Yaw && Yaw > 0)){
+						while ((targetYaw > Yaw && Yaw < 0) || (targetYaw < Yaw && Yaw > 0)) {
 							Yaw = getYaw();
 							// do nothing 
 						}
@@ -307,10 +308,10 @@ void loop() {
 					}
 					else {
 						targetYaw -= mSpeed;
-						analogWrite(motorPwmPinL, 200);
-						analogWrite(motorPwmPinR, 200);
+						analogWrite(motorPwmPinL, 255);
+						analogWrite(motorPwmPinR, 255);
 
-						while (targetYaw < getYaw()){
+						while (targetYaw < getYaw()) {
 
 							// do nothing 
 						}
@@ -327,26 +328,26 @@ void loop() {
 					digitalWrite(dir1PinL, LOW);    // Left Back
 					digitalWrite(dir2PinL, HIGH);   // Left Back	
 
-					if (targetYaw + mSpeed > 180){
+					if (targetYaw + mSpeed > 180) {
 						targetYaw = -180 + targetYaw - mSpeed;
 
 						Serial.print(F("Target: "));
 						Serial.println(targetYaw);
 
-						analogWrite(motorPwmPinL, 200);
-						analogWrite(motorPwmPinR, 200);
-						bool Yaw = getYaw();
-						while ((targetYaw < Yaw && Yaw > 0) || (targetYaw > Yaw && Yaw < 0)){
+						analogWrite(motorPwmPinL, 255);
+						analogWrite(motorPwmPinR, 255);
+						float Yaw = getYaw();
+						while ((targetYaw < Yaw && Yaw > 0) || (targetYaw > Yaw && Yaw < 0)) {
 							Yaw = getYaw();
 						}
 						makeSafe();
 					}
 					else {
 						targetYaw += mSpeed;
-						analogWrite(motorPwmPinL, 200);
-						analogWrite(motorPwmPinR, 200);
+						analogWrite(motorPwmPinL, 255);
+						analogWrite(motorPwmPinR, 255);
 
-						while (targetYaw > getYaw()){
+						while (targetYaw > getYaw()) {
 
 						}
 						makeSafe();
@@ -434,58 +435,68 @@ void makeSafe() {
 	digitalWrite(motorPwmPinR, LOW);
 }
 
-float getYaw() {  // True for right
-	mpu.resetFIFO();
-	// reset interrupt flag and get INT_STATUS byte
-
-
-	while (!mpuInterrupt && fifoCount < packetSize) {
-		// do nothing for a little bit while we get a gyro reading
-	}
-
-	mpuInterrupt = false;
-	mpuIntStatus = mpu.getIntStatus();
-
-	// get current FIFO count
-	fifoCount = mpu.getFIFOCount();
-
-	// check for overflow (this should never happen unless our code is too inefficient)
-	if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
-		// reset so we can continue cleanly
-		mpu.resetFIFO();
-		Serial.println(F("FIFO overflow!"));
-		// otherwise, check for DMP data ready interrupt (this should happen frequently)
-	}
-
-	else if (mpuIntStatus & 0x02) {
-		// wait for correct available data length, should be a VERY short wait
-		while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
-
-		// read a packet from FIFO
-		mpu.getFIFOBytes(fifoBuffer, packetSize);
-
-		// track FIFO count here in case there is > 1 packet available
-		// (this lets us immediately read more without waiting for an interrupt)
-		fifoCount -= packetSize;
-
-		mpu.dmpGetQuaternion(&q, fifoBuffer);
-		mpu.dmpGetGravity(&gravity, &q);
-		mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-		//Serial.print("ypr\t");
-
-		float Yaw = ypr[0] * 180 / M_PI;  // pick up last one
-
-		if (int(Yaw) % 10 == 0){  // display major angles
-			Serial.println(Yaw);
-		}
-		return Yaw;
-	}
-
-	// Do turning stuff here 
-
+void yawUntil(float targetYaw) {
+	//float startYaw = 
 }
 
-void setLeftMotor(int){}
+float getYaw() {  // True for right
+	mpu.resetFIFO();
+	while (true) {
+
+		// reset interrupt flag and get INT_STATUS byte
+		mpuInterrupt = false;
+
+		while (!mpuInterrupt) { //&& fifoCount < packetSize) {
+			// do nothing for a little bit while we get a gyro reading
+		}
+
+
+		mpuIntStatus = mpu.getIntStatus();
+
+		// get current FIFO count
+		fifoCount = mpu.getFIFOCount();
+
+
+		// check for overflow (this should never happen unless our code is too inefficient)
+		if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+			// reset so we can continue cleanly
+			mpu.resetFIFO();
+			Serial.println(F("FIFO overflow!"));
+			continue;
+			// otherwise, check for DMP data ready interrupt (this should happen frequently)
+		}
+
+		if (mpuIntStatus & 0x02) {
+			// wait for correct available data length, should be a VERY short wait
+			while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+			// read a packet from FIFO
+			mpu.getFIFOBytes(fifoBuffer, packetSize);
+
+			// track FIFO count here in case there is > 1 packet available
+			// (this lets us immediately read more without waiting for an interrupt)
+			fifoCount -= packetSize;
+
+			mpu.dmpGetQuaternion(&q, fifoBuffer);
+			mpu.dmpGetGravity(&gravity, &q);
+			mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+			//Serial.print("ypr\t");
+
+			float Yaw = ypr[0] * 180 / M_PI;  // pick up last one
+
+			if (int(Yaw) % 10 == 0) {  // display major angles
+
+				Serial.print(F("Reading: "));
+				Serial.println(Yaw);
+			}
+			return Yaw;
+		}
+
+		// Do turning stuff here 
+	}
+}
+
+void setLeftMotor(int) {}
 
 //  LM298 Enable Pins
 //  Enable Motor  HIGH–Enable   LOW – Disable Motor

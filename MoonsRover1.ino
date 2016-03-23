@@ -91,7 +91,6 @@ uint8_t fifoBuffer[64]; // FIFO storage buffer
 
 float targetYaw;
 
-
 volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 
 // orientation/motion vars
@@ -136,7 +135,9 @@ void setup() {
 	// join I2C bus (I2Cdev library doesn't do this automatically)
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 	Wire.begin();
-	TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz). Comment this line if having compilation difficulties with TWBR.
+
+	TWBR = 12; // set 400kHz mode @ 16MHz CPU or 200kHz mode @ 8MHz CPU
+	//TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz). Comment this line if having compilation difficulties with TWBR.
 #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
 	Fastwire::setup(400, true);
 #endif
@@ -268,15 +269,15 @@ void loop() {
 
 					digitalWrite(dir1PinL, LOW);
 					digitalWrite(dir2PinL, HIGH);
-					digitalWrite(dir1PinL, LOW);
-					digitalWrite(dir2PinL, HIGH);
+					digitalWrite(dir1PinR, LOW);
+					digitalWrite(dir2PinR, HIGH);
 					analogWrite(motorPwmPinL, mSpeed);
 					analogWrite(motorPwmPinR, mSpeed);
 				} // end IF dir = B
 				else if (dir == 'L' || dir == 'l' || dir == 'R' || dir == 'r'){
 					// a turn?
 
-					float targetYaw = getYaw();  // Find out what way we are facing
+					targetYaw = getYaw();  // Find out what way we are facing
 					Serial.println(targetYaw, 1);  // for debug
 				}
 
@@ -290,6 +291,8 @@ void loop() {
 
 					if ((targetYaw - mSpeed) < -180){
 						targetYaw = 180 + targetYaw + mSpeed;
+						Serial.print(F("Target: "));
+						Serial.println(targetYaw);
 
 						analogWrite(motorPwmPinL, 200);
 						analogWrite(motorPwmPinR, 200);
@@ -326,6 +329,9 @@ void loop() {
 
 					if (targetYaw + mSpeed > 180){
 						targetYaw = -180 + targetYaw - mSpeed;
+
+						Serial.print(F("Target: "));
+						Serial.println(targetYaw);
 
 						analogWrite(motorPwmPinL, 200);
 						analogWrite(motorPwmPinR, 200);
@@ -431,12 +437,14 @@ void makeSafe() {
 float getYaw() {  // True for right
 	mpu.resetFIFO();
 	// reset interrupt flag and get INT_STATUS byte
-	mpuInterrupt = false;
-	mpuIntStatus = mpu.getIntStatus();
+
 
 	while (!mpuInterrupt && fifoCount < packetSize) {
 		// do nothing for a little bit while we get a gyro reading
 	}
+
+	mpuInterrupt = false;
+	mpuIntStatus = mpu.getIntStatus();
 
 	// get current FIFO count
 	fifoCount = mpu.getFIFOCount();

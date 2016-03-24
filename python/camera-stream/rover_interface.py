@@ -15,6 +15,9 @@ class RoverInterface:
 
     # The serial port - currently does not exist/work
     ser = None
+    
+    # Make the class thread safe
+    lock = threading.Lock()
 
     
     def initialize(self):
@@ -55,11 +58,14 @@ class RoverInterface:
 
     def addValidInstructions(self, instructions):
         """Assumes the instructions are valid"""
-        RoverInterface.instructionDeque.extend(instructions)
+        """Program will stop here until we can et access to variable"""  
+        with lock:
+        	n = len(cls.instructionDeque) 
+        	RoverInterface.instructionDeque.extend(instructions)
 
         # If the thread is not running, create a new one and start it
         # TODO: is this safe? - Probably not
-        if RoverInterface.thread is None:
+        if n == 0:
             RoverInterface.thread = threading.Thread(target=self._thread)
             RoverInterface.thread.start()
 
@@ -68,7 +74,8 @@ class RoverInterface:
     def _thread(cls):
         """This method is run by the thread. It runs the instructions on the Arduino."""
         while len(cls.instructionDeque) > 0:
-            instruction = cls.instructionDeque.popleft()
+            with lock:	
+                instruction = cls.instructionDeque.popleft()
 	    command = instruction['command']
 	    if command == "forward":
 	        cls.transmit("MLF255,")
@@ -93,7 +100,7 @@ class RoverInterface:
                 print("Command not handled: {}".format(command))
         
         # TODO: This is only reassigning the reference, not deleting the thread
-        cls.thread = None
+        # cls.thread = None ; not needed? Thread ending anyway?
 
 
     @classmethod

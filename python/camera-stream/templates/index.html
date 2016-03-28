@@ -1,9 +1,104 @@
 <html>
   <head>
     <title>Video Streaming Demonstration</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script>
+$(document).ready(function(){
+$("button").click(function(){
+var id = $(this).attr('id');
+if(id == 0) {
+var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "http://192.168.35.166:5000/rover/api/v1.0/instructions",
+  "method": "PUT",
+  "headers": {
+    "content-type": "application/json",
+    "cache-control": "no-cache",
+    "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
+  },
+  "processData": false,
+  "data": "[{\"command\":\"forward\",\"distance\":0}]"
+}
+
+
+$.ajax(settings).done(function (response) {
+  console.log(response);
+});
+}
+else if (id == 1) {
+var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "http://192.168.35.166:5000/rover/api/v1.0/instructions",
+  "method": "PUT",
+  "headers": {
+    "content-type": "application/json",
+    "cache-control": "no-cache",
+    "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
+  },
+  "processData": false,
+  "data": "[{\"command\":\"left\",\"distance\":0}]"
+}
+
+$.ajax(settings).done(function (response) {
+  console.log(response);
+});
+
+}
+else if (id == 2) {
+var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "http://192.168.35.166:5000/rover/api/v1.0/instructions",
+  "method": "PUT",
+  "headers": {
+    "content-type": "application/json",
+    "cache-control": "no-cache",
+    "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
+  },
+  "processData": false,
+  "data": "[{\"command\":\"back\",\"distance\":0}]"
+}
+
+$.ajax(settings).done(function (response) {
+  console.log(response);
+});
+
+}
+else if (id == 3) {
+var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "http://192.168.35.166:5000/rover/api/v1.0/instructions",
+  "method": "PUT",
+  "headers": {
+    "content-type": "application/json",
+    "cache-control": "no-cache",
+    "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
+  },
+  "processData": false,
+  "data": "[{\"command\":\"right\",\"distance\":0}]"
+}
+
+$.ajax(settings).done(function (response) {
+  console.log(response);
+});
+
+}
+});
+});
+</script>
+</head>
   </head>
   <body>
     <h1>Video Streaming Demonstration</h1>
-    <img src="{{ url_for('video_feed') }}">
+    <center>
+     <img src="{{ url_for('video_feed') }}"><br />
+     <button id="0">forward</button><br />
+     <button id="1">left</button> <button id="2">back</button> <button id="3">right</button>
+   </center>
   </body>
 </html>
+
+

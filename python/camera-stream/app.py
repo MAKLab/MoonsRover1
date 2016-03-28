@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import json
 from flask import Flask, render_template, Response, request
+from flask.ext.cors import CORS
 
 try:
     from camera_pi import Camera
@@ -10,8 +11,9 @@ except ImportError:
 
 from rover_interface import RoverInterface
 
-# Create our Flask app
+# Create our Flask app, and enable CORS for all routes
 app = Flask(__name__)
+CORS(app)
 
 # Create the rover interface
 rover = RoverInterface()

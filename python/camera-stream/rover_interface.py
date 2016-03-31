@@ -16,14 +16,18 @@ class RoverInterface:
     # The serial port - currently does not exist/work
     ser = None
 
-    
+
     def initialize(self):
         try:
-	    RoverInterface.serialPort = serial.Serial('/dev/ttyAMA0', 115200)
-        
-	except(OSError, serial.SerialException):
-	    print("Caught SerialException")
-	    RoverInterface.serialPort = None
+            RoverInterface.serialPort = serial.Serial('/dev/ttyAMA0', 115200)
+        except(OSError, serial.SerialException):
+            print("Caught SerialException")
+            RoverInterface.serialPort = None
+
+
+    def status(self):
+        """The rover status as a JSON object"""
+        return {'hasSerial': RoverInterface.serialPort is not None}
 
 
     @classmethod
@@ -91,7 +95,7 @@ class RoverInterface:
 		time.sleep(1)
             else:
                 print("Command not handled: {}".format(command))
-        
+
         # TODO: This is only reassigning the reference, not deleting the thread
         cls.thread = None
 
@@ -101,5 +105,5 @@ class RoverInterface:
         if RoverInterface.serialPort is None:
 	    print(command)
 	    return
-	
+
 	RoverInterface.serialPort.write(command.encode('utf-8'))

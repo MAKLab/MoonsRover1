@@ -57,5 +57,11 @@ def postInstructions():
     return json.dumps({'success': True}), 200
 
 
+@app.route('/rover/api/v1.0/status', methods=['GET'])
+def getStatus():
+    """Provide some information about this rover."""
+    return json.dumps({'camera': Camera.status(), 'rover': rover.status()}), 200
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, threaded=True)

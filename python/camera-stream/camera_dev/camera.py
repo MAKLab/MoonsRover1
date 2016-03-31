@@ -10,6 +10,11 @@ class Camera(object):
         self.frames = [open('camera_dev/' + f + '.jpg', 'rb').read() for f in ['1', '2', '3']]
         print("... done!")
 
+    @classmethod
+    def status(cls):
+        """The camera status as a JSON object"""
+        return {'type': 'Emulated camera'}
+
     def get_frame(self):
         i = int(time()) % 3
         #print("Get frame {}".format(i))

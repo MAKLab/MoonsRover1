@@ -232,10 +232,10 @@ void loop() {
 	if (!dmpReady) return;
 	//Serial.print(".");
 	// Check to see if we have had no instruction for a while (bad)
-	if (timer + timeOut < millis()) {
-		makeSafe();
-		timer = millis();
-	}  // end if safety
+	//if (timer + timeOut < millis()) {
+	//	makeSafe();
+	//	timer = millis();
+	//}  // end if safety
 
 	//  Check to see if we have some instructions.  If there is enough serial data
 	//  for some reason I need more than one byte in the buffer?
@@ -245,7 +245,7 @@ void loop() {
 
 		// Check to see if its a motor
 		if (firstByte == 'M' || firstByte == 'm') {
-			Serial.println(F("Motor"));
+			//Serial.println(F("Motor"));
 
 			//  Its a motor, lets nab some movement data
 			byte motor = Serial.read();          // collects the motor name (L or R)
@@ -261,8 +261,9 @@ void loop() {
 					digitalWrite(dir2PinL, LOW);
 					digitalWrite(dir1PinR, HIGH);
 					digitalWrite(dir2PinR, LOW);
-					analogWrite(motorPwmPinL, mSpeed);
-					analogWrite(motorPwmPinR, mSpeed);
+					analogWrite(motorPwmPinL, 255);
+					analogWrite(motorPwmPinR, 255);
+					waitSome(mSpeed);
 				}
 				else if (dir == 'B' || dir == 'b') {
 					// perhaps reverse?			
@@ -271,15 +272,16 @@ void loop() {
 					digitalWrite(dir2PinL, HIGH);
 					digitalWrite(dir1PinR, LOW);
 					digitalWrite(dir2PinR, HIGH);
-					analogWrite(motorPwmPinL, mSpeed);
-					analogWrite(motorPwmPinR, mSpeed);
+					analogWrite(motorPwmPinL, 255);
+					analogWrite(motorPwmPinR, 255);
+					waitSome(mSpeed);
 				} // end IF dir = B
 				else if (dir == 'L' || dir == 'l' || dir == 'R' || dir == 'r') {
 					// a turn?
 
 					targetYaw = getYaw();  // Find out what way we are facing
-					Serial.print(F("Start Yaw: "));
-					Serial.println(targetYaw, 1);  // for debug
+					//Serial.print(F("Start Yaw: "));
+					//Serial.println(targetYaw, 1);  // for debug
 				}
 
 				// Now lets set our target 
@@ -292,14 +294,15 @@ void loop() {
 
 					if ((targetYaw - mSpeed) < -180) {
 						targetYaw = 180 + targetYaw + mSpeed;
-						Serial.print(F("Target: "));
-						Serial.println(targetYaw);
+						//Serial.print(F("Target: "));
+						//Serial.println(targetYaw);
 
 						analogWrite(motorPwmPinL, 255);
 						analogWrite(motorPwmPinR, 255);
 
 						float Yaw = getYaw();
-						while ((targetYaw > Yaw && Yaw < 0) || (targetYaw < Yaw && Yaw > 0)) {
+						timer = millis();
+						while ((targetYaw > Yaw && Yaw < 0) || (targetYaw < Yaw && Yaw > 0) || timer + timeOut > millis()) {
 							Yaw = getYaw();
 							// do nothing 
 						}
@@ -311,7 +314,7 @@ void loop() {
 						analogWrite(motorPwmPinL, 255);
 						analogWrite(motorPwmPinR, 255);
 
-						while (targetYaw < getYaw()) {
+						while (targetYaw < getYaw() || timer + timeOut > millis()) {
 
 							// do nothing 
 						}
@@ -331,13 +334,13 @@ void loop() {
 					if (targetYaw + mSpeed > 180) {
 						targetYaw = -180 + targetYaw - mSpeed;
 
-						Serial.print(F("Target: "));
-						Serial.println(targetYaw);
+						//Serial.print(F("Target: "));
+						//Serial.println(targetYaw);
 
 						analogWrite(motorPwmPinL, 255);
 						analogWrite(motorPwmPinR, 255);
 						float Yaw = getYaw();
-						while ((targetYaw < Yaw && Yaw > 0) || (targetYaw > Yaw && Yaw < 0)) {
+						while ((targetYaw < Yaw && Yaw > 0) || (targetYaw > Yaw && Yaw < 0) || timer + timeOut > millis()) {
 							Yaw = getYaw();
 						}
 						makeSafe();
@@ -347,7 +350,7 @@ void loop() {
 						analogWrite(motorPwmPinL, 255);
 						analogWrite(motorPwmPinR, 255);
 
-						while (targetYaw > getYaw()) {
+						while (targetYaw > getYaw() || timer + timeOut > millis()) {
 
 						}
 						makeSafe();
@@ -366,7 +369,8 @@ void loop() {
 					digitalWrite(dir1PinL, LOW);
 					digitalWrite(dir2PinL, HIGH);
 				} // end if dir = r
-				analogWrite(motorPwmPinL, mSpeed);
+				analogWrite(motorPwmPinL, 255);
+				waitSome(mSpeed);
 			}  // End IF Motor = L
 			else if (motor == 'R' || motor == 'r') {
 				// Are we going forwards
@@ -380,7 +384,8 @@ void loop() {
 					digitalWrite(dir2PinR, HIGH);
 				}
 
-				analogWrite(motorPwmPinR, mSpeed);
+				analogWrite(motorPwmPinR, 255);
+				waitSome(mSpeed);
 			}  // End IF Motor = R
 
 
@@ -433,6 +438,19 @@ void makeSafe() {
 	// tidy up by switching off the PWM signal
 	digitalWrite(motorPwmPinL, LOW);
 	digitalWrite(motorPwmPinR, LOW);
+
+	eof();
+}
+
+void waitSome(unsigned long del) {
+	timer = millis();
+	while (timer + del * 100 > millis()) {
+	}
+	makeSafe();
+}
+
+void eof() {
+	Serial.println(F("EOF"));
 }
 
 void yawUntil(float targetYaw) {
@@ -486,8 +504,8 @@ float getYaw() {  // True for right
 
 			if (int(Yaw) % 10 == 0) {  // display major angles
 
-				Serial.print(F("Reading: "));
-				Serial.println(Yaw);
+				//Serial.print(F("Reading: "));
+				//Serial.println(Yaw);
 			}
 			return Yaw;
 		}

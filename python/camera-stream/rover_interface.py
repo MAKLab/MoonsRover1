@@ -74,27 +74,21 @@ class RoverInterface:
         while len(cls.instructionDeque) > 0:
             instruction = cls.instructionDeque.popleft()
 	    command = instruction['command']
+	    distance = instruction['distance']
 	    if command == "forward":
-	        cls.transmit("MLF255,")
-	        cls.transmit("MRF255,")
-	        time.sleep(1)
+	        cls.transmit("MAF{},".format(distance))
 	    elif command == "back":
-	        cls.transmit("MLB255,")
-	        cls.transmit("MRB255,")
-	        time.sleep(1)
-            elif command == "right":
-                cls.transmit("MLB255,")
-		cls.transmit("MRF255,")
-		time.sleep(1)
-            elif command == "left":
-                cls.transmit("MLF255,")
-		cls.transmit("MRB255,")
-		time.sleep(1)
+	        cls.transmit("MAB{},".format(distance))
+        	    elif command == "right":
+	        cls.transmit("MAR{},".format(distance))
+        	    elif command == "left":
+	        cls.transmit("MAL{},".format(distance))
 	    elif command == "pan":
-	        cls.transmit("SP0,")
-		time.sleep(1)
-            else:
-                print("Command not handled: {}".format(command))
+	        cls.transmit("SP{},".format(distance))
+	    elif command == "tilt":
+	        cls.transmit("ST{},".format(distance))
+	    else:
+	        print("Command not handled: {}".format(command))
 
         # TODO: This is only reassigning the reference, not deleting the thread
         cls.thread = None

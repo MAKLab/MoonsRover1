@@ -1,6 +1,6 @@
-import time
 import io
 import threading
+import time
 import picamera
 
 
@@ -23,6 +23,11 @@ class Camera(object):
         Camera.last_access = time.time()
         self.initialize()
         return self.frame
+
+    @classmethod
+    def status(cls):
+        """The camera status as a JSON object"""
+        return {'type': 'Raspberry Pi camera module'}
 
     @classmethod
     def _thread(cls):

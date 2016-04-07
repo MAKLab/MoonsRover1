@@ -79,9 +79,9 @@ class RoverInterface:
 	        cls.transmit("MAF{},".format(distance))
 	    elif command == "back":
 	        cls.transmit("MAB{},".format(distance))
-        	    elif command == "right":
+            elif command == "right":
 	        cls.transmit("MAR{},".format(distance))
-        	    elif command == "left":
+            elif command == "left":
 	        cls.transmit("MAL{},".format(distance))
 	    elif command == "pan":
 	        cls.transmit("SP{},".format(distance))

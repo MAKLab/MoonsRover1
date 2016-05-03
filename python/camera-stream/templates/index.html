@@ -3,6 +3,7 @@
     <title>Video Streaming Demonstration</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
   <script>
+var myIP = window.location.href;
 $(document).ready(function(){
 $("button").click(function(){
 var id = $(this).attr('id');
@@ -10,7 +11,7 @@ if(id == 0) {
 var settings = {
   "async": true,
   "crossDomain": true,
-  "url": "http://192.168.35.166:5000/rover/api/v1.0/instructions",
+  "url": myIP + "rover/api/v1.0/instructions",
   "method": "PUT",
   "headers": {
     "content-type": "application/json",
@@ -18,7 +19,7 @@ var settings = {
     "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
   },
   "processData": false,
-  "data": "[{\"command\":\"forward\",\"distance\":0}]"
+  "data": "[{\"command\":\"forward\",\"distance\":255}]"
 }
 
 
@@ -30,7 +31,7 @@ else if (id == 1) {
 var settings = {
   "async": true,
   "crossDomain": true,
-  "url": "http://192.168.35.166:5000/rover/api/v1.0/instructions",
+  "url": myIP +  "rover/api/v1.0/instructions",
   "method": "PUT",
   "headers": {
     "content-type": "application/json",
@@ -38,7 +39,7 @@ var settings = {
     "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
   },
   "processData": false,
-  "data": "[{\"command\":\"left\",\"distance\":0}]"
+  "data": "[{\"command\":\"left\",\"distance\":30}]"
 }
 
 $.ajax(settings).done(function (response) {
@@ -50,7 +51,7 @@ else if (id == 2) {
 var settings = {
   "async": true,
   "crossDomain": true,
-  "url": "http://192.168.35.166:5000/rover/api/v1.0/instructions",
+  "url": myIP +  "rover/api/v1.0/instructions",
   "method": "PUT",
   "headers": {
     "content-type": "application/json",
@@ -58,7 +59,7 @@ var settings = {
     "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
   },
   "processData": false,
-  "data": "[{\"command\":\"back\",\"distance\":0}]"
+  "data": "[{\"command\":\"back\",\"distance\":255}]"
 }
 
 $.ajax(settings).done(function (response) {
@@ -70,7 +71,7 @@ else if (id == 3) {
 var settings = {
   "async": true,
   "crossDomain": true,
-  "url": "http://192.168.35.166:5000/rover/api/v1.0/instructions",
+  "url": myIP + "rover/api/v1.0/instructions",
   "method": "PUT",
   "headers": {
     "content-type": "application/json",
@@ -78,7 +79,7 @@ var settings = {
     "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
   },
   "processData": false,
-  "data": "[{\"command\":\"right\",\"distance\":0}]"
+  "data": "[{\"command\":\"right\",\"distance\":30}]"
 }
 
 $.ajax(settings).done(function (response) {

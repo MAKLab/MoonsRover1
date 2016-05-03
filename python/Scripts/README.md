@@ -15,4 +15,4 @@ Please note that everything is case sensitive so Scripts is not the same as scri
 
 ... while we're at it why not add a line to start the camera app.py too:
 
->sudo python /home/pi/MoonsRover1/python/camera-stream/app.py
+> sudo python /home/pi/MoonsRover1/python/camera-stream/app.py &

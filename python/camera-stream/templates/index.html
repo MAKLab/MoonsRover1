@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Video Streaming Demonstration</title>
+    <title>MoonsRover1</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
   <script>
 var myIP = window.location.href;
@@ -19,7 +19,7 @@ var settings = {
     "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
   },
   "processData": false,
-  "data": "[{\"command\":\"forward\",\"distance\":255}]"
+  "data": "[{\"command\":\"forward\",\"distance\":"+document.getElementById("4").value+"}]"
 }
 
 
@@ -39,7 +39,7 @@ var settings = {
     "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
   },
   "processData": false,
-  "data": "[{\"command\":\"left\",\"distance\":30}]"
+  "data": "[{\"command\":\"left\",\"distance\":"+document.getElementById("5").value+"}]"
 }
 
 $.ajax(settings).done(function (response) {
@@ -59,7 +59,7 @@ var settings = {
     "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
   },
   "processData": false,
-  "data": "[{\"command\":\"back\",\"distance\":255}]"
+  "data": "[{\"command\":\"back\",\"distance\":"+document.getElementById("4").value+"}]"
 }
 
 $.ajax(settings).done(function (response) {
@@ -79,7 +79,7 @@ var settings = {
     "postman-token": "99202990-dbe7-6280-647c-25cb9bff3b2f"
   },
   "processData": false,
-  "data": "[{\"command\":\"right\",\"distance\":30}]"
+  "data": "[{\"command\":\"right\",\"distance\":"+document.getElementById("5").value+"}]"
 }
 
 $.ajax(settings).done(function (response) {
@@ -97,7 +97,9 @@ $.ajax(settings).done(function (response) {
     <center>
      <img src="{{ url_for('video_feed') }}"><br />
      <button id="0">forward</button><br />
-     <button id="1">left</button> <button id="2">back</button> <button id="3">right</button>
+     <button id="1">left</button> <button id="2">back</button> <button id="3">right</button><br />
+     forward/back speed (0-255): <input type="number" max="255" min="0" value="255" step="5" id="4" /><br />
+     left/right angle (deg):  <input type="text" max="360" min="0" value="90" step="10" id="5" />
    </center>
   </body>
 </html>
